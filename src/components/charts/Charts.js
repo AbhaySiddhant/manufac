@@ -6,53 +6,43 @@ const Charts = () => {
   const colorintensity = [];
   const hue = [];
   let alcohol = [];
-  let malicAcidAvg = [];
+  let malicAcidArr = [];
 
-  const malicAcidArr1 = [];
-  const malicAcidArr2 = [];
-  const malicAcidArr3 = [];
-
-  function chartdata(arr = []) {
+  function chartdata(arr = [], n) {
     arr.filter((d) => {
       hue.push(d.Hue);
       colorintensity.push(d["Color intensity"]);
       return d;
     });
 
-    let total1 = 0;
-    let total2 = 0;
-    let total3 = 0;
-    let temAlArr = [];
-    for (let i = 0; i < arr.length; i++) {
-      temAlArr.push(arr[i].Alcohol);
-      if (arr[i].Alcohol === 1) {
-        malicAcidArr1.push(arr[i]["Malic Acid"]);
+    let groupedData = [];
+    arr.forEach((d) => {
+      let found = false;
+      groupedData.forEach((gd) => {
+        if (gd["Alcohol"] === d["Alcohol"]) {
+          gd["Malic Acid"].push(d["Malic Acid"]);
+          found = true;
+        }
+      });
+      if (!found) {
+        groupedData.push({
+          Alcohol: d["Alcohol"],
+          "Malic Acid": [d["Malic Acid"]],
+        });
       }
-      if (arr[i].Alcohol === 2) {
-        malicAcidArr2.push(arr[i]["Malic Acid"]);
-      }
-      if (arr[i].Alcohol === 3) {
-        malicAcidArr3.push(arr[i]["Malic Acid"]);
-      }
-    }
+    });
+    // Step 2: Extract alcohol to its own array, and average malic acid values to its own array.
 
-    alcohol.push(...new Set(temAlArr));
-    for (let i = 0; i < malicAcidArr1.length; i++) {
-      total1 += malicAcidArr1[i];
-    }
-    for (let i = 0; i < malicAcidArr2.length; i++) {
-      total2 += malicAcidArr2[i];
-    }
-    for (let i = 0; i < malicAcidArr3.length; i++) {
-      total3 += malicAcidArr3[i];
-    }
-    total1 = total1 / malicAcidArr1.length + 1;
-    total2 = total2 / malicAcidArr2.length + 1;
-    total3 = total3 / malicAcidArr3.length + 1;
-    malicAcidAvg.push(total1, total2, total3);
+    groupedData.forEach((gd) => {
+      alcohol.push(gd["Alcohol"]);
+      malicAcidArr.push(
+        gd["Malic Acid"].reduce((prev, curr) => prev + curr) /
+          gd["Malic Acid"].length
+      );
+    });
   }
-  chartdata(data);
-  console.log(alcohol);
+  chartdata(data, 1);
+
   const scatterChart = {
     xAxis: {
       name: "Color intensity",
@@ -88,7 +78,7 @@ const Charts = () => {
     series: [
       {
         name: "Malic acid",
-        data: malicAcidAvg,
+        data: malicAcidArr,
         type: "bar",
         smooth: true,
       },
