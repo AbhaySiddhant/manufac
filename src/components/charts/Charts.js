@@ -89,6 +89,7 @@ const Charts = () => {
   };
   return (
     <>
+    <h1>Chart Data</h>
       <ReactEcharts option={scatterChart} />
       <ReactEcharts option={barChart} />
     </>
